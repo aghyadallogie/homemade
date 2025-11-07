@@ -19,7 +19,7 @@ export class AuthGuard implements CanActivate {
     /**
      * Extracts the Bearer token from the Authorization header, verifies it using
      * JwtService.verifyAsync and attaches a user object to the request:
-     *   { userId: payload.sub, username: payload.username }
+     *   { userId: payload.sub, email: payload.email }
      *
      * @param context - ExecutionContext for the current request
      * @returns true when token is valid (allows the request), otherwise throws UnauthorizedException
@@ -43,7 +43,7 @@ export class AuthGuard implements CanActivate {
             const tokenPayload = await this.jwtService.verifyAsync(token);
             request.user = {
                 userId: tokenPayload.sub,
-                username: tokenPayload.username
+                email: tokenPayload.email
             }
 
             return true;

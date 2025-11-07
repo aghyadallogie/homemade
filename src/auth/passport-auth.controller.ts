@@ -1,5 +1,5 @@
-import { Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards } from "@nestjs/common";
-import { AuthService } from "./auth.service";
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards } from "@nestjs/common";
+import { AuthService, LoginDto, RegisterDto } from "./auth.service";
 import { PassportJwtAuthGuard } from "./guards/passport-jwt.guard";
 import { PassportLocalGuard } from "./guards/passport-local.guard";
 
@@ -7,7 +7,7 @@ import { PassportLocalGuard } from "./guards/passport-local.guard";
  * Authentication controller using Passport strategies.
  *
  * Endpoints:
- * - POST /auth/login -> authenticate with username/password (LocalStrategy) and return a JWT.
+ * - POST /auth/login -> authenticate with email/password (LocalStrategy) and return a JWT.
  * - GET  /auth/me    -> return authenticated user's info (requires Bearer JWT).
  */
 @Controller('auth')
@@ -24,8 +24,8 @@ export class PassportAuthController {
     @HttpCode(HttpStatus.OK)
     @Post('login')
     @UseGuards(PassportLocalGuard)
-    login(@Request() request) {
-        return this.authService.signIn(request.user) || 'success';
+    login(@Body() input: LoginDto) {
+        return this.authService.authenticate(input);
     }
 
     /**
@@ -39,5 +39,19 @@ export class PassportAuthController {
     @UseGuards(PassportJwtAuthGuard)
     getUserInfo(@Request() request) {
         return request.user;
+    }
+
+    /**
+     * Register a new user and return authentication result.
+     *
+     * Validates input, creates user via AuthService, and returns token on success.
+     *
+     * @param input - RegisterDto containing email, username and password
+     * @returns created user auth result (token or error)
+     */
+    @Post('register')
+    @HttpCode(HttpStatus.CREATED)
+    async register(@Body() input: RegisterDto) {
+        return this.authService.register(input);
     }
 }
